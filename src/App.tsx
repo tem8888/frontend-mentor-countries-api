@@ -1,25 +1,40 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import { useState } from 'react';
+import { Routes, Route } from 'react-router-dom';
+import CountryPage from './pages/CountryDetail/CountryDetail';
+import Home from './pages/Home/Home';
+import NoMatch from './pages/404/NoMatch';
+import { useTheme } from './hooks/useTheme';
+import { ThemeProvider } from 'styled-components';
+import { darkTheme, GlobalStyles, lightTheme } from './theme/theme';
+import Header from './components/Header/Header';
+import { IShortCountryInfo } from './types/apiResponse';
 
 function App() {
+  const [theme, handleChangeTheme] = useTheme('light');
+  const [countries, setCountries] = useState<IShortCountryInfo[]>([]);
+
+  const saveCountries = (data: IShortCountryInfo[]) => {
+    setCountries(data);
+  };
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <ThemeProvider theme={theme === 'dark' ? darkTheme : lightTheme}>
+      <GlobalStyles />
+      <Header theme={theme} handleChangeTheme={handleChangeTheme} />
+      <main>
+        <Routes>
+          <Route
+            index
+            element={
+              <Home countries={countries} saveCountries={saveCountries} />
+            }
+          />
+          <Route path="country">
+            <Route path=":name" element={<CountryPage />} />
+          </Route>
+          <Route path="*" element={<NoMatch />} />
+        </Routes>
+      </main>
+    </ThemeProvider>
   );
 }
 
